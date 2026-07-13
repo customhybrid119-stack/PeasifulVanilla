@@ -29,8 +29,7 @@ jobs:
         distribution: 'temurin'
         cache: 'gradle'
 
-    # УНИВЕРСАЛЬНЫЙ ШАГ: Сам находит gradlew, дает права и запускает сборку
-    - name: Find and Build with Gradle
+    - name: Find, Fix and Build with Gradle
       run: |
         # Ищем, в какой папке лежит gradlew
         GRADLEW_PATH=$(find . -name "gradlew" -print -quit)
@@ -40,9 +39,14 @@ jobs:
           exit 1
         fi
         
-        # Получаем чистый путь к папке, где лежит gradlew
         PROJECT_DIR=$(dirname "$GRADLEW_PATH")
         echo "Проект найден в папке: $PROJECT_DIR"
+        
+        # АВТО-ПОЧИНКА: Удаляем устаревшую строчку bootClasspath, из-за которой падал Gradle
+        if [ -f "$PROJECT_DIR/build.gradle" ]; then
+          echo "Удаляем bootClasspath из build.gradle..."
+          sed -i '/bootClasspath/d' "$PROJECT_DIR/build.gradle"
+        fi
         
         # Даем права и собираем
         chmod +x "$PROJECT_DIR/gradlew"
@@ -53,6 +57,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Compiled-Mod
-        # Ищет готовый .jar в любой папке build/libs, которая создалась
         path: "**/build/libs/*.jar"
         
