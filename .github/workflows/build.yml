@@ -16,6 +16,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    # ШАГ РАСПАКОВКИ: Ищет любой .zip файл в репозитории и распаковывает его
+    - name: Unzip project archive
+      run: |
+        unzip *.zip
+        ls -la # Показывает в логах, что распаковалось, для проверки
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
